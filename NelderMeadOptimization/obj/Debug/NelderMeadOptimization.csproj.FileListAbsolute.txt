@@ -1,0 +1,15 @@
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.exe.config
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.exe
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.pdb
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.csproj.AssemblyReference.cache
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.csproj.CoreCompileInputs.cache
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.exe
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.pdb
+C:\Users\Admin\source\repos\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.exe.config
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.exe.config
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.exe
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\bin\Debug\NelderMeadOptimization.pdb
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.csproj.AssemblyReference.cache
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.exe
+C:\Users\user\Documents\ННГУ\method_optimization\NelderMeadOptimization\NelderMeadOptimization\obj\Debug\NelderMeadOptimization.pdb
