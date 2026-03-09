@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Functions\QuadraticFunction.cs" />
+    <Compile Include="Functions\RastriginFunction.cs" />
+    <Compile Include="Functions\RosenbrockFunction.cs" />
     <Compile Include="Functions\SphereFunction.cs" />
     <Compile Include="Interface\ITestFunction.cs" />
     <Compile Include="Models\OptimizationResult.cs" />
