@@ -10,51 +10,19 @@ namespace NelderMeadOptimization.Optimizers
 {
     internal class NelderMeadOptimizer
     {
-        private readonly ITestFunction _function;
+        private readonly ITestFunction function;
 
-        private readonly double _alpha;  // коэффициент отражения
-        private readonly double _beta;   // коэффициент растяжени
-        private readonly double _gamma;  // коэффициент сжатия
-        private readonly double _sigma;  // коэффициент редукции
-        private readonly double _tolerance;  // точность
-        private readonly int _maxIterations; // максимум итераций
-
-        public NelderMeadOptimizer(
-            ITestFunction function,
-            double alpha = 1.0,
-            double beta = 2.0,
-            double gamma = 0.5,
-            double sigma = 0.5,
-            double tolerance = 1e-6,
-            int maxIterations = 1000)
-        {
-            _function = function ?? throw new ArgumentNullException(nameof(function));
-            _alpha = alpha;
-            _beta = beta;
-            _gamma = gamma;
-            _sigma = sigma;
-            _tolerance = tolerance;
-            _maxIterations = maxIterations;
-        }
+        private const double alpha = 1.0;  // коэффициент отражения
+        private const double beta = 2.0;   // коэффициент растяжени
+        private const double gamma = 0.5;  // коэффициент сжатия
+        private const double sigma = 0.5;  // коэффициент редукции
+        private const double tolerance = 1e-6;  // точность
+        private const int maxIterations = 1000; // максимум итераций
 
         public NelderMeadOptimizer(ITestFunction function)
-                : this(function, 1.0, 2.0, 0.5, 0.5, 1e-6, 1000)
         {
+            this.function = function ?? throw new ArgumentNullException(nameof(function));
         }
-
-
-        /*public OptimizationResult Optimize(Point[] initialSimplex)
-        {
-            return new OptimizationResult
-            {
-                FunctoinName = _function.Name,
-                OptimalPoint = initialSimplex[0],
-                Iterations = 0,
-                Converged = false
-            };
-
-        }*/
-
 
         public OptimizationResult Optimize(Point[] initialSimplex)
         {
@@ -79,7 +47,7 @@ namespace NelderMeadOptimization.Optimizers
             int iteration = 0;
 
             // Основной цикл оптимизации
-            while (iteration < _maxIterations && !IsConverged(simplex))
+            while (iteration < maxIterations && !IsConverged(simplex))
             {
                 iteration++;
 
@@ -93,14 +61,14 @@ namespace NelderMeadOptimization.Optimizers
 
                 // 3. Отражение
                 Point reflected = Reflection(centroid, worst);
-                reflected.Value = _function.Evaluate(reflected.X, reflected.Y);
+                reflected.Value = function.Evaluate(reflected.X, reflected.Y);
 
                 // 4. Анализ результата отражения
                 if (reflected.Value < best.Value)
                 {
                     // Очень хороший результат - пробуем растяжение
                     Point expanded = Expansion(centroid, reflected);
-                    expanded.Value = _function.Evaluate(expanded.X, expanded.Y);
+                    expanded.Value = function.Evaluate(expanded.X, expanded.Y);
 
                     if (expanded.Value < reflected.Value)
                         simplex[2] = expanded;  // берем растянутую
@@ -119,7 +87,7 @@ namespace NelderMeadOptimization.Optimizers
                     {
                         // Внешнее сжатие (отраженная точка лучше худшей)
                         Point contracted = OuterContraction(centroid, reflected);
-                        contracted.Value = _function.Evaluate(contracted.X, contracted.Y);
+                        contracted.Value = function.Evaluate(contracted.X, contracted.Y);
 
                         if (contracted.Value < reflected.Value)
                             simplex[2] = contracted;
@@ -130,7 +98,7 @@ namespace NelderMeadOptimization.Optimizers
                     {
                         // Внутреннее сжатие (отраженная точка хуже худшей)
                         Point contracted = InnerContraction(centroid, worst);
-                        contracted.Value = _function.Evaluate(contracted.X, contracted.Y);
+                        contracted.Value = function.Evaluate(contracted.X, contracted.Y);
 
                         if (contracted.Value < worst.Value)
                             simplex[2] = contracted;
@@ -148,8 +116,8 @@ namespace NelderMeadOptimization.Optimizers
             {
                 OptimalPoint = simplex[0],
                 Iterations = iteration,
-                Converged = iteration < _maxIterations,
-                FunctoinName = _function.Name
+                Converged = iteration < maxIterations,
+                FunctoinName = function.Name
             };
         }
 
@@ -166,54 +134,51 @@ namespace NelderMeadOptimization.Optimizers
             double maxValue = simplex.Max(p => p.Value);
             double minValue = simplex.Min(p => p.Value);
 
-            return Math.Abs(maxValue - minValue) < _tolerance;
+            return Math.Abs(maxValue - minValue) < tolerance;
         }
 
        // Отражение: U(r) = c(r) + α[c(r) - x ^ n(r)]
         private Point Reflection(Point centroid, Point worst)
         {
-            double x = centroid.X + _alpha * (centroid.X - worst.X);
-            double y = centroid.Y + _alpha * (centroid.Y - worst.Y);
+            double x = centroid.X + alpha * (centroid.X - worst.X);
+            double y = centroid.Y + alpha * (centroid.Y - worst.Y);
             return new Point(x, y, 0);
         }
 
         // Растяжение: V(r) = c(r) + β[U(r) - c(r)]
         private Point Expansion(Point centroid, Point reflected)
         {
-            double x = centroid.X + _beta * (reflected.X - centroid.X);
-            double y = centroid.Y + _beta * (reflected.Y - centroid.Y);
+            double x = centroid.X + beta * (reflected.X - centroid.X);
+            double y = centroid.Y + beta * (reflected.Y - centroid.Y);
             return new Point(x, y, 0);
         }
 
         // Внутреннее сжатие: W(r) = c(r) + γ[x^n(r) - c(r)]
         private Point InnerContraction(Point centroid, Point worst)
         {
-            double x = centroid.X + _gamma * (worst.X - centroid.X);
-            double y = centroid.Y + _gamma * (worst.Y - centroid.Y);
+            double x = centroid.X + gamma * (worst.X - centroid.X);
+            double y = centroid.Y + gamma * (worst.Y - centroid.Y);
             return new Point(x, y, 0);
         }
 
         // Внешнее сжатие: W(r) = c(r) + γ[U(r) - c(r)]
         private Point OuterContraction(Point centroid, Point reflected)
         {
-            double x = centroid.X + _gamma * (reflected.X - centroid.X);
-            double y = centroid.Y + _gamma * (reflected.Y - centroid.Y);
+            double x = centroid.X + gamma * (reflected.X - centroid.X);
+            double y = centroid.Y + gamma * (reflected.Y - centroid.Y);
             return new Point(x, y, 0);
         }
-
-
-
 
         // Редукция (сжатие всего симплекса к лучшей точке)
         private void Reduction(Point[] simplex, Point best)
         {
             for (int i = 1; i < simplex.Length; i++)
             {
-                double newX = best.X + _sigma * (simplex[i].X - best.X);
-                double newY = best.Y + _sigma * (simplex[i].Y - best.Y);
+                double newX = best.X + sigma * (simplex[i].X - best.X);
+                double newY = best.Y + sigma * (simplex[i].Y - best.Y);
                 simplex[i].X = newX;
                 simplex[i].Y = newY;
-                simplex[i].Value = _function.Evaluate(newX, newY);
+                simplex[i].Value = function.Evaluate(newX, newY);
             }
         }
 
@@ -221,11 +186,5 @@ namespace NelderMeadOptimization.Optimizers
         {
             Array.Sort(points, (a, b) => a.Value.CompareTo(b.Value));
         }
-
-
-
-
-
-
     }
 }

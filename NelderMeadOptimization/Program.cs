@@ -60,27 +60,29 @@ namespace NelderMeadOptimization
             Console.WriteLine("\nResult:");
             res.Print();
 
-
-
-            // Тестируем на сферической функции
+            // Тестируем на нескольких функциях
+            Console.WriteLine("Test 1");
+            Console.WriteLine("---------------------------------------------");
             TestSphereFunction();
 
-            /*
-            Point best = new Point(0, 0, sphere.Evaluate(0, 0));
-            Point good = new Point(1, 0, sphere.Evaluate(1, 0));
-            Point worst = new Point(1, 1, sphere.Evaluate(1, 1));
-            Console.WriteLine($"  best:  {best}");
-            Console.WriteLine($"  Средняя: {good}");
-            */
+            Console.WriteLine("Test 2");
+            Console.WriteLine("---------------------------------------------");
+            TestQuadraticFunction();
 
+            Console.WriteLine("Test 3");
+            Console.WriteLine("---------------------------------------------");
+            TestRastriginFunction();
+
+            Console.WriteLine("Test 4");
+            Console.WriteLine("---------------------------------------------");
+            TestRosenbrockFunction();
+
+            Console.ReadLine();
         }
 
 
         static void TestSphereFunction()
         {
-            Console.WriteLine("Test 1");
-            Console.WriteLine("---------------------------------------------");
-
             // Создаем функцию
             ITestFunction sphere = new SphereFunction();
 
@@ -109,15 +111,125 @@ namespace NelderMeadOptimization
             result.Print();
 
             // Проверяем, насколько близко к истинному минимуму
-            double trueMinX = 0;
-            double trueMinY = 0;
+            double trueMinX = 0.0;
+            double trueMinY = 0.0;
             double error = Math.Sqrt(
                 Math.Pow(result.OptimalPoint.X - trueMinX, 2) +
                 Math.Pow(result.OptimalPoint.Y - trueMinY, 2));
 
             Console.WriteLine($"\nError: {error:F6}");
             Console.WriteLine(error < 1e-4 ? "Yes" : "No");
-            Console.ReadLine();
+        }
+
+        static void TestQuadraticFunction()
+        {
+            ITestFunction quadratic = new QuadraticFunction();
+
+            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(quadratic);
+
+            Point[] initialSimplex = new Point[]
+            {
+                new Point(0.0, 0.0, quadratic.Evaluate(0.0, 0.0)),
+                new Point(1.0, 0.0, quadratic.Evaluate(1.0, 0.0)),
+                new Point(0.0, 1.0, quadratic.Evaluate(0.0, 1.0))
+            };
+
+            Console.WriteLine("Start simplex:");
+            foreach (var p in initialSimplex)
+            {
+                Console.WriteLine($"  {p}");
+            }
+
+            // Запускаем оптимизацию
+            Console.WriteLine("\n Start optimization");
+            OptimizationResult result = optimizer.Optimize(initialSimplex);
+
+            // Выводим результат
+            result.Print();
+
+            // Проверяем, насколько близко к истинному минимуму
+            double trueMinX = 1.0;
+            double trueMinY = 4.0;
+            double error = Math.Sqrt(
+                Math.Pow(result.OptimalPoint.X - trueMinX, 2) +
+                Math.Pow(result.OptimalPoint.Y - trueMinY, 2));
+
+            Console.WriteLine($"\nError: {error:F6}");
+            Console.WriteLine(error < 1e-4 ? "Yes" : "No");
+        }
+
+        static void TestRastriginFunction()
+        {
+            ITestFunction rastrigin = new RastriginFunction();
+
+            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(rastrigin);
+
+            Point[] initialSimplex = new Point[]
+            {
+                new Point(1.0, 1.0, rastrigin.Evaluate(1.0, 1.0)),
+                new Point(2.0, 1.0, rastrigin.Evaluate(2.0, 1.0)),
+                new Point(1.0, 2.0, rastrigin.Evaluate(1.0, 2.0))
+            };
+
+            Console.WriteLine("Start simplex:");
+            foreach (var p in initialSimplex)
+            {
+                Console.WriteLine($"  {p}");
+            }
+
+            // Запускаем оптимизацию
+            Console.WriteLine("\n Start optimization");
+            OptimizationResult result = optimizer.Optimize(initialSimplex);
+
+            // Выводим результат
+            result.Print();
+
+            // Проверяем, насколько близко к истинному минимуму
+            double trueMinX = 0.0;
+            double trueMinY = 0.0;
+            double error = Math.Sqrt(
+                Math.Pow(result.OptimalPoint.X - trueMinX, 2) +
+                Math.Pow(result.OptimalPoint.Y - trueMinY, 2));
+
+            Console.WriteLine($"\nError: {error:F6}");
+            Console.WriteLine(error < 1e-4 ? "Yes" : "No");
+        }
+
+        static void TestRosenbrockFunction()
+        {
+            ITestFunction rosenbrock = new RosenbrockFunction();
+
+            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(rosenbrock);
+
+            Point[] initialSimplex = new Point[]
+            {
+                new Point(-1.0, 1.0, rosenbrock.Evaluate(-1.0, 1.0)),
+                new Point(0.0, 1.0, rosenbrock.Evaluate(0.0, 1.0)),
+                new Point(-1.0, 2.0, rosenbrock.Evaluate(-1.0, 2.0))
+            };
+
+            Console.WriteLine("Start simplex:");
+            foreach (var p in initialSimplex)
+            {
+                Console.WriteLine($"  {p}");
+            }
+
+            // Запускаем оптимизацию
+            Console.WriteLine("\n Start optimization");
+            OptimizationResult result = optimizer.Optimize(initialSimplex);
+
+            // Выводим результат
+            result.Print();
+
+            // Проверяем, насколько близко к истинному минимуму
+            double trueMinX = 1.0;
+            double trueMinY = 1.0;
+            double error = Math.Sqrt(
+                Math.Pow(result.OptimalPoint.X - trueMinX, 2) +
+                Math.Pow(result.OptimalPoint.Y - trueMinY, 2));
+
+            Console.WriteLine($"\nError: {error:F6}");
+            Console.WriteLine(error < 1e-4 ? "Yes" : "No");
         }
     }
 
