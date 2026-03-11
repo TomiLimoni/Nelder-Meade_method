@@ -49,142 +49,88 @@ namespace NelderMeadOptimization
                 new Point(0, 1, sphere.Evaluate(0, 1))
             };
 
-            Console.WriteLine("Start simplex:");
-            foreach (var point in simplex)
-            {
-                Console.WriteLine($"  {point}");
-            }
+            PrintStartSimplex(simplex);
 
             OptimizationResult res = optimizer.Optimize(simplex);
 
-            Console.WriteLine("\nResult:");
             res.Print();
 
+            //Словарь тестируемых функций
+            var testFunction = new Dictionary<ITestFunction, Point>()
+            {
+                { new SphereFunction(), new Point(0.0, 0.0, 0.0) },
+                { new QuadraticFunction(), new Point(1.0, 4.0, -21.0) },
+                { new RastriginFunction(), new Point(0.0, 0.0, 0.0) },
+                { new RosenbrockFunction(), new Point(1.0, 1.0, 0.0) }
+            };
+
             // Тестируем на нескольких функциях
-            Console.WriteLine("Test 1");
-            Console.WriteLine("---------------------------------------------");
-            TestSphereFunction();
-
-            Console.WriteLine("Test 2");
-            Console.WriteLine("---------------------------------------------");
-            TestQuadraticFunction();
-
-            Console.WriteLine("Test 3");
-            Console.WriteLine("---------------------------------------------");
-            TestRastriginFunction();
-
-            Console.WriteLine("Test 4");
-            Console.WriteLine("---------------------------------------------");
-            TestRosenbrockFunction();
-
+            int count = 0;
+            foreach(var test in testFunction)
+            {
+                count++;
+                Console.WriteLine($"\nTest {count}");
+                Console.WriteLine("---------------------------------------------");
+                StartTestFunction(test.Key, test.Value);
+            }
             Console.ReadLine();
         }
-
-        static void TestSphereFunction()
+        static void StartTestFunction(ITestFunction function, Point pointTrueMin)
         {
-            // Создаем функцию
-            ITestFunction sphere = new SphereFunction();
+            //Создаём начальный симплекс (треугольник)
+            Point[] initialSimplex = GetInitialSimplex(function);
 
-            // Создаем оптимизатор
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(sphere);
-
-            // Создаем начальный симплекс (треугольник)
-            Point[] initialSimplex = new Point[]
-            {
-                new Point(2.0, 2.0, sphere.Evaluate(2.0, 2.0)),   // точка A
-                new Point(3.0, 2.0, sphere.Evaluate(3.0, 2.0)),   // точка B
-                new Point(2.0, 3.0, sphere.Evaluate(2.0, 3.0))    // точка C
-            };
             //Выводим начальный симплекс
             PrintStartSimplex(initialSimplex);
 
+            //Создаём оптимизатор
+            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(function);
+
             // Запускаем оптимизацию
-            OptimizationResult result = StartOptimization(optimizer, initialSimplex);
+            Console.WriteLine("\n Start optimization");
+            OptimizationResult result = optimizer.Optimize(initialSimplex);
 
             // Выводим результат
             result.Print();
 
             // Проверяем, насколько близко к истинному минимуму
-            Point pointTrueMin = new Point(0.0, 0.0, 0.0);
             CheckMin(result, pointTrueMin);
         }
-
-        static void TestQuadraticFunction()
+        static Point[] GetInitialSimplex(ITestFunction function)
         {
-            ITestFunction quadratic = new QuadraticFunction();
-
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(quadratic);
-
-            Point[] initialSimplex = new Point[]
+            switch (function.Name)
             {
-                new Point(0.0, 0.0, quadratic.Evaluate(0.0, 0.0)),
-                new Point(1.0, 0.0, quadratic.Evaluate(1.0, 0.0)),
-                new Point(0.0, 1.0, quadratic.Evaluate(0.0, 1.0))
-            };
-
-            PrintStartSimplex(initialSimplex);
-
-            // Запускаем оптимизацию
-            OptimizationResult result = StartOptimization(optimizer, initialSimplex);
-
-            // Выводим результат
-            result.Print();
-
-            // Проверяем, насколько близко к истинному минимуму
-            Point pointTrueMin = new Point(1.0, 4.0, -21.0);
-            CheckMin(result, pointTrueMin);
-        }
-
-        static void TestRastriginFunction()
-        {
-            ITestFunction rastrigin = new RastriginFunction();
-
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(rastrigin);
-
-            Point[] initialSimplex = new Point[]
-            {
-                new Point(1.0, 1.0, rastrigin.Evaluate(1.0, 1.0)),
-                new Point(2.0, 1.0, rastrigin.Evaluate(2.0, 1.0)),
-                new Point(1.0, 2.0, rastrigin.Evaluate(1.0, 2.0))
-            };
-
-            PrintStartSimplex(initialSimplex);
-
-            // Запускаем оптимизацию
-            OptimizationResult result = StartOptimization(optimizer, initialSimplex);
-
-            // Выводим результат
-            result.Print();
-
-            // Проверяем, насколько близко к истинному минимуму
-            Point pointTrueMin = new Point(0.0, 0.0, 0.0);
-            CheckMin(result, pointTrueMin);
-        }
-
-        static void TestRosenbrockFunction()
-        {
-            ITestFunction rosenbrock = new RosenbrockFunction();
-
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(rosenbrock);
-
-            Point[] initialSimplex = new Point[]
-            {
-                new Point(-1.0, 1.0, rosenbrock.Evaluate(-1.0, 1.0)),
-                new Point(0.0, 1.0, rosenbrock.Evaluate(0.0, 1.0)),
-                new Point(-1.0, 2.0, rosenbrock.Evaluate(-1.0, 2.0))
-            };
-
-            PrintStartSimplex(initialSimplex);
-
-            // Запускаем оптимизацию
-            OptimizationResult result = StartOptimization(optimizer, initialSimplex);
-
-            // Выводим результат
-            result.Print();
-
-            // Проверяем, насколько близко к истинному минимуму
-            Point pointTrueMin = new Point(1.0, 1.0, 0.0);
-            CheckMin(result, pointTrueMin);
+                case "Sphere func: x^2 + y^2":
+                    return new Point[]
+                    {
+                        new Point(2.0, 2.0, function.Evaluate(2.0, 2.0)),   // точка A
+                        new Point(3.0, 2.0, function.Evaluate(3.0, 2.0)),   // точка B
+                        new Point(2.0, 3.0, function.Evaluate(2.0, 3.0))    // точка C
+                    };
+                case "Quadratic: x^2 + xy + y^2 - 6x - 9y":
+                    return new Point[]
+                    {
+                        new Point(0.0, 0.0, function.Evaluate(0.0, 0.0)),
+                        new Point(1.0, 0.0, function.Evaluate(1.0, 0.0)),
+                        new Point(0.0, 1.0, function.Evaluate(0.0, 1.0))
+                    };
+                case "Rastrigin: 20 + x^2 - 10cos(2*pi*x) + y^2 - 10cos(2*pi*y)":
+                    return new Point[]
+                    {
+                        new Point(1.0, 1.0, function.Evaluate(1.0, 1.0)),
+                        new Point(2.0, 1.0, function.Evaluate(2.0, 1.0)),
+                        new Point(1.0, 2.0, function.Evaluate(1.0, 2.0))
+                    };
+                case "Rosenbrock: (1-x)^2 + 100(y-x^2)^2":
+                    return new Point[]
+                    {
+                        new Point(-1.0, 1.0, function.Evaluate(-1.0, 1.0)),
+                        new Point(0.0, 1.0, function.Evaluate(0.0, 1.0)),
+                        new Point(-1.0, 2.0, function.Evaluate(-1.0, 2.0))
+                    };
+                default:
+                    throw new ArgumentException("Unknown function");
+            }
         }
         //функция для вывода начального симплекса
         static void PrintStartSimplex(Point[] simplex)
@@ -194,13 +140,6 @@ namespace NelderMeadOptimization
             {
                 Console.WriteLine($"  {p}");
             }
-        }
-        //функция запуска оптимизации
-        static OptimizationResult StartOptimization(NelderMeadOptimizer optimizer, Point[] initialSimplex)
-        {
-            Console.WriteLine("\n Start optimization");
-            OptimizationResult result = optimizer.Optimize(initialSimplex);
-            return result;
         }
         //функция для проверки близости к истинному минимуму
         static void CheckMin(OptimizationResult result, Point pointTrueMin)

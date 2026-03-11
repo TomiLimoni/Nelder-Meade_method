@@ -10,7 +10,7 @@ namespace NelderMeadOptimization.Functions
 {
     public class SphereFunction : ITestFunction
     {
-        public string Name => "Sphere func";
+        public string Name => "Sphere func: x^2 + y^2";
 
         public double Evaluate(double x, double y)
         {
