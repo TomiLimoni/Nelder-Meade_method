@@ -10,11 +10,24 @@ namespace NelderMeadOptimization.Functions
 {
     public class SphereFunction : ITestFunction
     {
-        public string Name => "Sphere func: x^2 + y^2";
-
-        public double Evaluate(double x, double y)
+        public string Name => $"Spherical function ({Dimension}D)";
+        public int Dimension { get; }
+        public SphereFunction(int dimension = 2)
         {
-            return x * x + y * y;
+            Dimension = dimension;
+        }
+        public double Evaluate(double[] coordinates)
+        {
+            if (coordinates.Length != Dimension)
+                throw new ArgumentException($"Ожидалось {Dimension} координат");
+
+            // f(x) = sum(x_i²)
+            double sum = 0;
+            for (int i = 0; i < Dimension; i++)
+            {
+                sum += coordinates[i] * coordinates[i];
+            }
+            return sum;
         }
     }
 }

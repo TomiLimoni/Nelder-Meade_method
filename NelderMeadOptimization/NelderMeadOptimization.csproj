@@ -51,7 +51,9 @@
     <Compile Include="Interface\ITestFunction.cs" />
     <Compile Include="Models\OptimizationResult.cs" />
     <Compile Include="Models\Point.cs" />
+    <Compile Include="Models\Simplex.cs" />
     <Compile Include="Optimizers\NelderMeadOptimizer.cs" />
+    <Compile Include="Optimizers\Parameters.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

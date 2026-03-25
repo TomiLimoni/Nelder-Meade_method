@@ -9,6 +9,7 @@ namespace NelderMeadOptimization.Interface
     internal interface ITestFunction
     {
         string Name { get; }
-        double Evaluate(double x, double y);
+        double Evaluate(double[] coordinates);
+        int Dimension { get; }
     }
 }

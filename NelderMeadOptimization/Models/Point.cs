@@ -8,20 +8,36 @@ namespace NelderMeadOptimization.Models
 {
     internal class Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
-
-        public double Value { get; set; }
-
-        public Point(double x, double y, double value)
+        public double[] Coordinates { get; }
+        public int Dimension => Coordinates.Length; // размерность пространства
+        private double value; // значение функции в точке
+        public double Value
         {
-            X = x;
-            Y = y;
-            Value = value;
+            get => value;
+            private set => this.value = value;
+        }
+
+        public Point(double[] coordinates, double value)
+        {
+            Coordinates = coordinates ?? throw new ArgumentNullException(nameof(coordinates));
+            this.value = value;
+        }
+        // конструктор без значения функции (будет вычислена позже)
+        public Point(double[] coordinates) : this(coordinates, 0) { }
+        public double this[int index] => Coordinates[index]; // доступ к координате по индексу
+        public void UpdateValue(double newValue)
+        {
+            Value = newValue;
+        }
+        // создание копии точки
+        public Point Clone()
+        {
+            return new Point((double[])Coordinates.Clone(), Value);
         }
         public override string ToString()
         {
-            return $" ({X}; {Y})={Value}";
+            string coords = string.Join("; ", Coordinates.Select(c => c.ToString("F6")));
+            return $" ({coords})={Value}";
         }
     }
 }

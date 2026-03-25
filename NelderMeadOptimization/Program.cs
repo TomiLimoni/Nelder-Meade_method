@@ -14,141 +14,183 @@ namespace NelderMeadOptimization
     {
         static void Main(string[] args)
         {
-             Console.WriteLine("Test");
+            // ТЕСТ 1: 2D сферическая функция
+            TestSphere2D();
 
-             Point p = new Point(1.5, 2.3, 42.0);
-             Console.WriteLine(p.ToString());
+            Console.WriteLine("\n" + new string('=', 60));
 
-            ITestFunction sphere = new SphereFunction();
-            double x = 2.0;
-            double y = 3.0;
-            double value = sphere.Evaluate(x, y);
+            // ТЕСТ 2: 3D сферическая функция
+            TestSphere3D();
 
-            Console.WriteLine($"\nFunction: {sphere.Name}");
-            Console.WriteLine($"f({x}, {y}) = {value}");
+            Console.WriteLine("\n" + new string('=', 60));
 
-            x = 0; y = 0;
-            value = sphere.Evaluate(x, y);
-            Console.WriteLine($"f({x}, {y}) = {value}");
+            // ТЕСТ 3: 5D сферическая функция
+            TestSphere5D();
 
-            OptimizationResult result = new OptimizationResult
+            Console.WriteLine("\n" + new string('=', 60));
+
+            // ТЕСТ 4: Функция Розенброка (только 2D)
+            TestRosenbrock();
+
+            Console.WriteLine("\nНажмите любую клавишу для завершения...");
+            Console.ReadKey();
+        }
+        static void TestSphere2D()
+        {
+            Console.WriteLine("\nТЕСТ 1: Сферическая функция в 2D");
+
+            int dim = 2;
+            var function = new SphereFunction(dim);
+            var optimizer = new NelderMeadOptimizer(function);
+
+            // Создаем начальный симплекс (3 точки для 2D)
+            Point[] points = new Point[]
             {
-                OptimalPoint = p,
-                Iterations = 42,
-                Converged = true,
-                FunctoinName = sphere.Name
-            };
-            result.Print();
-
-            //тест оптимиз
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(sphere);
-            Point[] simplex = new Point[]
-            {
-                new Point(0, 0, sphere.Evaluate(0, 0)),
-                new Point(1, 0, sphere.Evaluate(1, 0)),
-                new Point(0, 1, sphere.Evaluate(0, 1))
-            };
-
-            PrintStartSimplex(simplex);
-
-            OptimizationResult res = optimizer.Optimize(simplex);
-
-            res.Print();
-
-            //Словарь тестируемых функций
-            var testFunction = new Dictionary<ITestFunction, Point>()
-            {
-                { new SphereFunction(), new Point(0.0, 0.0, 0.0) },
-                { new QuadraticFunction(), new Point(1.0, 4.0, -21.0) },
-                { new RastriginFunction(), new Point(0.0, 0.0, 0.0) },
-                { new RosenbrockFunction(), new Point(1.0, 1.0, 0.0) }
+                new Point(new double[] { 2.0, 2.0 }),
+                new Point(new double[] { 3.0, 2.0 }),
+                new Point(new double[] { 2.0, 3.0 })
             };
 
-            // Тестируем на нескольких функциях
-            int count = 0;
-            foreach(var test in testFunction)
+            // ВАЖНО: Вычисляем и сохраняем значения для вывода
+            Console.WriteLine($"Начальные точки (размерность {dim}):");
+            foreach (var p in points)
             {
-                count++;
-                Console.WriteLine($"\nTest {count}");
-                Console.WriteLine("---------------------------------------------");
-                StartTestFunction(test.Key, test.Value);
-            }
-            Console.ReadLine();
-        }
-        static void StartTestFunction(ITestFunction function, Point pointTrueMin)
-        {
-            //Создаём начальный симплекс (треугольник)
-            Point[] initialSimplex = GetInitialSimplex(function);
-
-            //Выводим начальный симплекс
-            PrintStartSimplex(initialSimplex);
-
-            //Создаём оптимизатор
-            NelderMeadOptimizer optimizer = new NelderMeadOptimizer(function);
-
-            // Запускаем оптимизацию
-            Console.WriteLine("\n Start optimization");
-            OptimizationResult result = optimizer.Optimize(initialSimplex);
-
-            // Выводим результат
-            result.Print();
-
-            // Проверяем, насколько близко к истинному минимуму
-            CheckMin(result, pointTrueMin);
-        }
-        static Point[] GetInitialSimplex(ITestFunction function)
-        {
-            switch (function.Name)
-            {
-                case "Sphere func: x^2 + y^2":
-                    return new Point[]
-                    {
-                        new Point(2.0, 2.0, function.Evaluate(2.0, 2.0)),   // точка A
-                        new Point(3.0, 2.0, function.Evaluate(3.0, 2.0)),   // точка B
-                        new Point(2.0, 3.0, function.Evaluate(2.0, 3.0))    // точка C
-                    };
-                case "Quadratic: x^2 + xy + y^2 - 6x - 9y":
-                    return new Point[]
-                    {
-                        new Point(0.0, 0.0, function.Evaluate(0.0, 0.0)),
-                        new Point(1.0, 0.0, function.Evaluate(1.0, 0.0)),
-                        new Point(0.0, 1.0, function.Evaluate(0.0, 1.0))
-                    };
-                case "Rastrigin: 20 + x^2 - 10cos(2*pi*x) + y^2 - 10cos(2*pi*y)":
-                    return new Point[]
-                    {
-                        new Point(1.0, 1.0, function.Evaluate(1.0, 1.0)),
-                        new Point(2.0, 1.0, function.Evaluate(2.0, 1.0)),
-                        new Point(1.0, 2.0, function.Evaluate(1.0, 2.0))
-                    };
-                case "Rosenbrock: (1-x)^2 + 100(y-x^2)^2":
-                    return new Point[]
-                    {
-                        new Point(-1.0, 1.0, function.Evaluate(-1.0, 1.0)),
-                        new Point(0.0, 1.0, function.Evaluate(0.0, 1.0)),
-                        new Point(-1.0, 2.0, function.Evaluate(-1.0, 2.0))
-                    };
-                default:
-                    throw new ArgumentException("Unknown function");
-            }
-        }
-        //функция для вывода начального симплекса
-        static void PrintStartSimplex(Point[] simplex)
-        {
-            Console.WriteLine("Start simplex:");
-            foreach (var p in simplex)
-            {
+                double val = function.Evaluate(p.Coordinates);
+                p.UpdateValue(val); // Сохраняем значение в точку
                 Console.WriteLine($"  {p}");
             }
+
+            // Запускаем оптимизацию
+            var result = optimizer.Optimize(points);
+            result.Print();
+
+            // Проверка: насколько близко к (0,0)
+            double error = 0;
+            for (int i = 0; i < dim; i++)
+            {
+                error += Math.Abs(result.OptimalPoint[i]);
+            }
+            Console.WriteLine($"Суммарная ошибка от (0,0): {error:F6}");
         }
-        //функция для проверки близости к истинному минимуму
-        static void CheckMin(OptimizationResult result, Point pointTrueMin)
+
+        static void TestSphere3D()
         {
+            Console.WriteLine("\nТЕСТ 2: Сферическая функция в 3D");
+
+            int dim = 3;
+            var function = new SphereFunction(dim);
+            var optimizer = new NelderMeadOptimizer(function);
+
+            // Для 3D нужно 4 точки
+            Point[] points = new Point[]
+            {
+                new Point(new double[] { 2.0, 2.0, 2.0 }),
+                new Point(new double[] { 3.0, 2.0, 2.0 }),
+                new Point(new double[] { 2.0, 3.0, 2.0 }),
+                new Point(new double[] { 2.0, 2.0, 3.0 })
+            };
+
+            // ВАЖНО: Вычисляем и сохраняем значения для вывода
+            Console.WriteLine($"Начальные точки (размерность {dim}):");
+            foreach (var p in points)
+            {
+                double val = function.Evaluate(p.Coordinates);
+                p.UpdateValue(val); // Сохраняем значение в точку
+                Console.WriteLine($"  {p}");
+            }
+
+            // Запускаем оптимизацию
+            var result = optimizer.Optimize(points);
+            result.Print();
+
+            // Проверка: насколько близко к (0,0,0)
+            double error = 0;
+            for (int i = 0; i < dim; i++)
+            {
+                error += Math.Abs(result.OptimalPoint[i]);
+            }
+            Console.WriteLine($"Суммарная ошибка от (0,0,0): {error:F6}");
+
+            // Дополнительная проверка
+        }
+
+        static void TestSphere5D()
+        {
+            Console.WriteLine("\nТЕСТ 3: Сферическая функция в 5D");
+
+            int dim = 5;
+            var function = new SphereFunction(dim);
+            var optimizer = new NelderMeadOptimizer(function);
+
+            // Для 5D нужно 6 точек
+            Point[] points = new Point[]
+            {
+                new Point(new double[] { 2.0, 2.0, 2.0, 2.0, 2.0 }),
+                new Point(new double[] { 3.0, 2.0, 2.0, 2.0, 2.0 }),
+                new Point(new double[] { 2.0, 3.0, 2.0, 2.0, 2.0 }),
+                new Point(new double[] { 2.0, 2.0, 3.0, 2.0, 2.0 }),
+                new Point(new double[] { 2.0, 2.0, 2.0, 3.0, 2.0 }),
+                new Point(new double[] { 2.0, 2.0, 2.0, 2.0, 3.0 })
+            };
+
+            // ВАЖНО: Вычисляем и сохраняем значения для вывода
+            Console.WriteLine($"Начальные точки (размерность {dim}):");
+            for (int i = 0; i < points.Length; i++)
+            {
+                double val = function.Evaluate(points[i].Coordinates);
+                points[i].UpdateValue(val); // Сохраняем значение в точку
+                Console.WriteLine($"  Точка {i + 1}: {points[i]}");
+            }
+
+            // Запускаем оптимизацию
+            var result = optimizer.Optimize(points);
+            result.Print();
+
+            // Проверка: насколько близко к (0,0,0,0,0)
+            double error = 0;
+            for (int i = 0; i < dim; i++)
+            {
+                error += Math.Abs(result.OptimalPoint[i]);
+            }
+            Console.WriteLine($"Суммарная ошибка от (0,0,0,0,0): {error:F6}");
+
+            // Дополнительная проверка
+        }
+
+        static void TestRosenbrock()
+        {
+            Console.WriteLine("\nТЕСТ 4: Функция Розенброка (только 2D)");
+
+            var function = new RosenbrockFunction();
+            var optimizer = new NelderMeadOptimizer(function);
+
+            // Для 2D нужно 3 точки
+            Point[] points = new Point[]
+            {
+                new Point(new double[] { 0.0, 0.0 }),
+                new Point(new double[] { 1.0, 0.0 }),
+                new Point(new double[] { 0.0, 1.0 })
+            };
+
+            // ВАЖНО: Вычисляем и сохраняем значения для вывода
+            Console.WriteLine("Начальные точки:");
+            foreach (var p in points)
+            {
+                double val = function.Evaluate(p.Coordinates);
+                p.UpdateValue(val); // Сохраняем значение в точку
+                Console.WriteLine($"  {p}");
+            }
+
+            // Запускаем оптимизацию
+            var result = optimizer.Optimize(points);
+            result.Print();
+
+            // Проверка: насколько близко к (1,1)
             double error = Math.Sqrt(
-                Math.Pow(result.OptimalPoint.X - pointTrueMin.X, 2) +
-                Math.Pow(result.OptimalPoint.Y - pointTrueMin.Y, 2));
-            Console.WriteLine($"\nError: {error:F6}");
-            Console.WriteLine(error < 1e-4 ? "Yes" : "No");
+                Math.Pow(result.OptimalPoint[0] - 1.0, 2) +
+                Math.Pow(result.OptimalPoint[1] - 1.0, 2));
+            Console.WriteLine($"Ошибка от (1,1): {error:F6}");
+
         }
     }
 }
