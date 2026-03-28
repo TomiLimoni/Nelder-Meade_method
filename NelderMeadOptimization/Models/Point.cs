@@ -1,43 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NelderMeadOptimization.Models
 {
     internal class Point
     {
         public double[] Coordinates { get; }
-        public int Dimension => Coordinates.Length; // размерность пространства
-        private double value; // значение функции в точке
-        public double Value
-        {
-            get => value;
-            private set => this.value = value;
-        }
+        public int Dimension => Coordinates.Length;
+        public double Value { get; }
 
-        public Point(double[] coordinates, double value)
+        private Point(double[] coordinates, double value)
         {
             Coordinates = coordinates ?? throw new ArgumentNullException(nameof(coordinates));
-            this.value = value;
+            Value = value;
         }
-        // конструктор без значения функции (будет вычислена позже)
-        public Point(double[] coordinates) : this(coordinates, 0) { }
-        public double this[int index] => Coordinates[index]; // доступ к координате по индексу
-        public void UpdateValue(double newValue)
+
+        public static Point Create(double[] coordinates, Func<double[], double> evaluate)
         {
-            Value = newValue;
+            if (evaluate == null)
+                throw new ArgumentNullException(nameof(evaluate));
+
+            double value = evaluate(coordinates);
+            return new Point(coordinates, value);
         }
-        // создание копии точки
-        public Point Clone()
-        {
-            return new Point((double[])Coordinates.Clone(), Value);
-        }
+
+        public double this[int index] => Coordinates[index];
+
         public override string ToString()
         {
             string coords = string.Join("; ", Coordinates.Select(c => c.ToString("F6")));
-            return $" ({coords})={Value}";
+            return $"({coords}) = {Value:F6}";
         }
     }
 }
