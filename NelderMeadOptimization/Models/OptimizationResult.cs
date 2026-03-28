@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NelderMeadOptimization.Models
 {
     internal class OptimizationResult
     {
         public Point OptimalPoint { get; set; }
-        public int  Iterations { get; set; }
+        public int Iterations { get; set; }
         public bool Converged { get; set; }
-        public string FunctoinName { get; set; }
-        public void Print()
+        public string FunctionName { get; set; }
+
+        public override string ToString()
         {
-            Console.WriteLine($"\n Result for: {FunctoinName}");
-            Console.WriteLine($"Optimal Point: {OptimalPoint}");
-            Console.WriteLine($"Number of iterations: {Iterations}");
-            Console.WriteLine($"Converged? {(Converged ? "Yes" : "No")}");
+            var sb = new StringBuilder();
+            sb.AppendLine($"\n Result for: {FunctionName}");
+            sb.AppendLine($"Optimal Point: {OptimalPoint}");
+            sb.AppendLine($"Number of iterations: {Iterations}");
+            sb.AppendLine($"Converged? {(Converged ? "Yes" : "No")}");
+            return sb.ToString();
         }
     }
 }
