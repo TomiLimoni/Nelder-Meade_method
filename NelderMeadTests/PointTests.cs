@@ -12,9 +12,8 @@ namespace NelderMeadTests
         public void Create_Point()
         {
             var sphere = new SphereFunction(2);
-            double[] coords = { 2.0, 3.0 };
 
-            var point = Point.Create(coords, sphere.Evaluate);
+            var point = Point.Create(sphere.Evaluate, 2.0, 3.0);
 
             Assert.AreEqual(2.0, point[0]);
             Assert.AreEqual(3.0, point[1]);
@@ -24,8 +23,7 @@ namespace NelderMeadTests
         public void ToString_for_point()
         {
             var sphere = new SphereFunction(2);
-            double[] coords = { 2.5, 3.5 };
-            var point = Point.Create(coords, sphere.Evaluate);
+            var point = Point.Create(sphere.Evaluate, 2.5, 3.5);
 
             string str = point.ToString();
 
