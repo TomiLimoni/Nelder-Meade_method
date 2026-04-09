@@ -64,7 +64,7 @@ namespace NelderMeadOptimization.Models
                 reflected[i] = centroid[i] + alpha * (centroid[i] - Worst[i]);
             }
 
-            return Point.Create(reflected, evaluate);
+            return Point.Create(evaluate, reflected);
         }
 
         public Point Expand(double[] centroid, Point reflected, Func<double[], double> evaluate, double beta)
@@ -77,7 +77,7 @@ namespace NelderMeadOptimization.Models
                 expanded[i] = centroid[i] + beta * (reflected[i] - centroid[i]);
             }
 
-            return Point.Create(expanded, evaluate);
+            return Point.Create(evaluate, expanded);
         }
 
         public Point ContractInside(double[] centroid, Func<double[], double> evaluate, double gamma)
@@ -90,7 +90,7 @@ namespace NelderMeadOptimization.Models
                 contracted[i] = centroid[i] + gamma * (Worst[i] - centroid[i]);
             }
 
-            return Point.Create(contracted, evaluate);
+            return Point.Create(evaluate, contracted);
         }
 
         public Point ContractOutside(double[] centroid, Point reflected, Func<double[], double> evaluate, double gamma)
@@ -103,7 +103,7 @@ namespace NelderMeadOptimization.Models
                 contracted[i] = centroid[i] + gamma * (reflected[i] - centroid[i]);
             }
 
-            return Point.Create(contracted, evaluate);
+            return Point.Create(evaluate, contracted);
         }
 
         public void Reduce(Func<double[], double> evaluate, double sigma)
@@ -115,7 +115,7 @@ namespace NelderMeadOptimization.Models
                 {
                     newCoords[j] = Best[j] + sigma * (_points[i][j] - Best[j]);
                 }
-                _points[i] = Point.Create(newCoords, evaluate);
+                _points[i] = Point.Create(evaluate, newCoords);
             }
             Sort();
         }

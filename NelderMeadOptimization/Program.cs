@@ -38,9 +38,9 @@ namespace NelderMeadOptimization
             // Создаем точки через фабричный метод
             Point[] points = new Point[]
             {
-                Point.Create(new double[] { 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 3.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 3.0 }, function.Evaluate)
+                Point.Create(function.Evaluate, 2.0, 2.0),
+                Point.Create(function.Evaluate, 3.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 3.0)
             };
 
             Console.WriteLine($"Начальные точки (размерность {dim}):");
@@ -68,10 +68,10 @@ namespace NelderMeadOptimization
 
             Point[] points = new Point[]
             {
-                Point.Create(new double[] { 2.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 3.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 3.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 2.0, 3.0 }, function.Evaluate)
+                Point.Create(function.Evaluate, 2.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 3.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 3.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 2.0, 3.0)
             };
 
             Console.WriteLine($"Начальные точки (размерность {dim}):");
@@ -100,12 +100,12 @@ namespace NelderMeadOptimization
 
             Point[] points = new Point[]
             {
-                Point.Create(new double[] { 2.0, 2.0, 2.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 3.0, 2.0, 2.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 3.0, 2.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 2.0, 3.0, 2.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 2.0, 2.0, 3.0, 2.0 }, function.Evaluate),
-                Point.Create(new double[] { 2.0, 2.0, 2.0, 2.0, 3.0 }, function.Evaluate)
+                Point.Create(function.Evaluate, 2.0, 2.0, 2.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 3.0, 2.0, 2.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 3.0, 2.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 2.0, 3.0, 2.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 2.0, 2.0, 3.0, 2.0),
+                Point.Create(function.Evaluate, 2.0, 2.0, 2.0, 2.0, 3.0)
             };
 
             Console.WriteLine($"Начальные точки (размерность {dim}):");
@@ -135,9 +135,9 @@ namespace NelderMeadOptimization
 
             Point[] points = new Point[]
             {
-                Point.Create(new double[] { 0.0, 0.0 }, function.Evaluate),
-                Point.Create(new double[] { 1.0, 0.0 }, function.Evaluate),
-                Point.Create(new double[] { 0.0, 1.0 }, function.Evaluate)
+                Point.Create(function.Evaluate, 0.0, 0.0),
+                Point.Create(function.Evaluate, 1.0, 0.0),
+                Point.Create(function.Evaluate, 0.0, 1.0)
             };
 
             Console.WriteLine("Начальные точки:");

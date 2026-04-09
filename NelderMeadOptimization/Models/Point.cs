@@ -15,7 +15,7 @@ namespace NelderMeadOptimization.Models
             Value = value;
         }
 
-        public static Point Create(double[] coordinates, Func<double[], double> evaluate)
+        public static Point Create(Func<double[], double> evaluate, params double[] coordinates)
         {
             if (evaluate == null)
                 throw new ArgumentNullException(nameof(evaluate));
