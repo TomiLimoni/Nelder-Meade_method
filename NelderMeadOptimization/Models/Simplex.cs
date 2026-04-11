@@ -43,10 +43,9 @@ namespace NelderMeadOptimization.Models
 
         public double[] GetCentroidCoordinates()
         {
-            int dimension = Dimension;
-            double[] center = new double[dimension];
+            double[] center = new double[Dimension];
 
-            for (int i = 0; i < dimension; i++)
+            for (int i = 0; i < Dimension; i++)
             {
                 center[i] = _points.Take(_points.Length - 1).Average(p => p[i]);
             }
@@ -56,10 +55,9 @@ namespace NelderMeadOptimization.Models
 
         public Point Reflect(double[] centroid, Func<double[], double> evaluate, double alpha)
         {
-            int dimension = Dimension;
-            double[] reflected = new double[dimension];
+            double[] reflected = new double[Dimension];
 
-            for (int i = 0; i < dimension; i++)
+            for (int i = 0; i < Dimension; i++)
             {
                 reflected[i] = centroid[i] + alpha * (centroid[i] - Worst[i]);
             }
@@ -69,10 +67,9 @@ namespace NelderMeadOptimization.Models
 
         public Point Expand(double[] centroid, Point reflected, Func<double[], double> evaluate, double beta)
         {
-            int dimension = Dimension;
-            double[] expanded = new double[dimension];
+            double[] expanded = new double[Dimension];
 
-            for (int i = 0; i < dimension; i++)
+            for (int i = 0; i < Dimension; i++)
             {
                 expanded[i] = centroid[i] + beta * (reflected[i] - centroid[i]);
             }
@@ -82,10 +79,9 @@ namespace NelderMeadOptimization.Models
 
         public Point ContractInside(double[] centroid, Func<double[], double> evaluate, double gamma)
         {
-            int dimension = Dimension;
-            double[] contracted = new double[dimension];
+            double[] contracted = new double[Dimension];
 
-            for (int i = 0; i < dimension; i++)
+            for (int i = 0; i < Dimension; i++)
             {
                 contracted[i] = centroid[i] + gamma * (Worst[i] - centroid[i]);
             }
@@ -95,10 +91,9 @@ namespace NelderMeadOptimization.Models
 
         public Point ContractOutside(double[] centroid, Point reflected, Func<double[], double> evaluate, double gamma)
         {
-            int dimension = Dimension;
-            double[] contracted = new double[dimension];
+            double[] contracted = new double[Dimension];
 
-            for (int i = 0; i < dimension; i++)
+            for (int i = 0; i < Dimension; i++)
             {
                 contracted[i] = centroid[i] + gamma * (reflected[i] - centroid[i]);
             }
