@@ -34,3 +34,4 @@ using System.Runtime.InteropServices;
 
 
 [assembly: InternalsVisibleTo("NelderMeadTests")]
+[assembly: InternalsVisibleTo("NelderMeadVisualizer")]

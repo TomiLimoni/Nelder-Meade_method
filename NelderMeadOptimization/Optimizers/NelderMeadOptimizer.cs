@@ -8,6 +8,7 @@ namespace NelderMeadOptimization.Optimizers
     {
         private readonly ITestFunction _function;
         private readonly Parameters _params;
+        public event Action<Simplex, int> IterationCompleted;
 
         public NelderMeadOptimizer(ITestFunction function, Parameters parameters = null)
         {
@@ -64,6 +65,8 @@ namespace NelderMeadOptimization.Optimizers
                             simplex.Reduce(_function.Evaluate, _params.Sigma);
                     }
                 }
+                IterationCompleted?.Invoke(simplex, iteration);
+
             }
 
             return new OptimizationResult
