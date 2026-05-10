@@ -3,11 +3,13 @@ using NelderMeadOptimization.Interface;
 using NelderMeadOptimization.Models;
 using NelderMeadOptimization.Optimizers;
 using NelderMeadVisualizer.Optimization;
+using NelderMeadVisualizer.Services;
 using NelderMeadVisualizer.Visualization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,83 +26,168 @@ namespace NelderMeadVisualizer
 {
     public partial class MainWindow : Window
     {
-        private SimplexHistory _history;
-        private SimplexDrawer _drawer;
-        private ZoomController _zoomController;
-        private StepByStepOptimizer _stepOptimizer;
-
-        private double _minX = -2, _maxX = 5, _minY = -2, _maxY = 5;
+        private readonly ZoomController _zoomController;
+        private readonly SimplexStateManager _simplexManager;
+        private readonly UIManager _uiManager;
+        private readonly ResultFormatter _resultFormatter;
+        private readonly OptimizationRunner _optimizationRunner;
+        private readonly StepByStepOptimizer _stepOptimizer;
 
         public MainWindow()
         {
             InitializeComponent();
-            InitializeComponents();
 
-            btnRun.Click += BtnRun_Click;
-            btnStep.Click += BtnStep_Click;
-            btnReset.Click += BtnReset_Click;
-            btnResetZoom.Click += ResetZoom_Click;
-        }
+            var controls = UIControls.FromMainWindow(this);
 
-        private void InitializeComponents()
-        {
-            _history = new SimplexHistory();
             _zoomController = new ZoomController(SimplexCanvas);
-            _drawer = new SimplexDrawer(SimplexCanvas, _zoomController);
+            _simplexManager = new SimplexStateManager(SimplexCanvas, _zoomController);
+            _uiManager = new UIManager(controls);
+            _resultFormatter = new ResultFormatter();
             _stepOptimizer = new StepByStepOptimizer();
 
+            _optimizationRunner = new OptimizationRunner(
+                onIterationComplete: OnIterationComplete,
+                onComplete: OnOptimizationComplete
+            );
+
+            InitializeStepOptimizer();
+            AttachEventHandlers();
+        }
+
+        private void OnIterationComplete(Simplex simplex, int iteration)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var function = SelectFunction();
+                var drawOptions = DrawOptions.Create(_simplexManager.History, _simplexManager.Bounds);
+                drawOptions.Function = function;
+                drawOptions.ShowContours = chkShowContours.IsChecked == true;
+                _simplexManager.AddAndDraw(simplex, iteration, drawOptions);
+                UpdateIterationDisplay(iteration);
+            });
+        }
+
+        private void OnOptimizationComplete(OptimizationResult result)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (result != null)
+                    ShowCompletionResult(result);
+                else
+                    ShowCancelledResult();
+                _uiManager.UnlockAfterOptimization();
+            });
+        }
+
+        private void InitializeStepOptimizer()
+        {
             _stepOptimizer.IterationCompleted += (simplex, iter) =>
             {
                 Dispatcher.Invoke(() =>
                 {
-                    _history.Add(simplex, iter);
-                    UpdateBounds(simplex);
-                    txtIterations.Text = $"Итераций: {iter}";
+                    var function = SelectFunction();
+                    var options = DrawOptions.Create(_simplexManager.History, _simplexManager.Bounds);
+                    options.Function = function;
+                    options.ShowContours = chkShowContours.IsChecked == true;
+                    _simplexManager.AddAndDraw(simplex, iter, options);
+                    UpdateIterationDisplay(iter);
 
                     if (_stepOptimizer.IsCompleted)
                     {
-                        ShowCompletionResult(simplex, iter);
+                        var data = new OptimizationData
+                        {
+                            Function = SelectFunction(),
+                            Simplex = simplex,
+                            Iteration = iter,
+                            Parameters = GetParameters(),
+                            Converged = simplex.IsConverged(GetParameters().Tolerance)
+                        };
+
+                        txtResult.Text = _resultFormatter.Format(data);
+                        double error = data.Function.CalculateError(data.Simplex.Best.Coordinates);
+                        txtFinalError.Text = $"{error:F8}";
+                        txtConverged.Text = data.Converged ? "Да" : "Нет";
+
+                        _uiManager.UpdateStatus(_resultFormatter.GetStatusText(data.Converged));
+                        _uiManager.UpdateStatusBar("Пошаговый режим завершён");
+                        btnStep.IsEnabled = false;
                     }
                 });
             };
         }
 
-        private void UpdateBounds(Simplex simplex)
+        private void AttachEventHandlers()
         {
-            for (int i = 0; i < simplex.Size; i++)
+            btnRun.Click += BtnRun_Click;
+            btnStep.Click += BtnStep_Click;
+            btnReset.Click += BtnReset_Click;
+            btnResetZoom.Click += (s, e) => _zoomController.Reset();
+            btnResetPoints.Click += (s, e) => _uiManager.ResetInitialPoints();
+            chkShowContours.Checked += (s, e) => RedrawWithContours();
+            chkShowContours.Unchecked += (s, e) => RedrawWithContours();
+        }
+
+        private Parameters GetParameters()
+        {
+            try
             {
-                _minX = Math.Min(_minX, simplex[i][0] - 1);
-                _maxX = Math.Max(_maxX, simplex[i][0] + 1);
-                _minY = Math.Min(_minY, simplex[i][1] - 1);
-                _maxY = Math.Max(_maxY, simplex[i][1] + 1);
+                var culture = System.Globalization.CultureInfo.InvariantCulture;
+                return new Parameters
+                {
+                    Alpha = double.Parse(txtAlpha.Text, culture),
+                    Beta = double.Parse(txtBeta.Text, culture),
+                    Gamma = double.Parse(txtGamma.Text, culture),
+                    Sigma = double.Parse(txtSigma.Text, culture),
+                    Tolerance = double.Parse(txtTolerance.Text, culture),
+                    MaxIterations = int.Parse(txtMaxIterations.Text)
+                };
             }
-            _drawer.DrawAll(_history, _minX, _maxX, _minY, _maxY);
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка в параметрах: {ex.Message}\nИспользуются стандартные значения",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return new Parameters();
+            }
         }
 
         private void ResetAll()
         {
-            _history.Clear();
+            _simplexManager.Clear();
             _stepOptimizer.Reset();
             _zoomController.Reset();
-            _minX = -2; _maxX = 5; _minY = -2; _maxY = 5;
-            _drawer.Clear();
+            _optimizationRunner.Cancel();
 
-            btnRun.IsEnabled = true;
-            btnStep.IsEnabled = true;
             txtResult.Text = "";
-            txtIterations.Text = "Итераций: -";
-            txtConverged.Text = "Сходимость: -";
-            txtStatus.Text = "Готов";
-            txtStatus.Foreground = new SolidColorBrush(Colors.Green);
-            statusBarText.Text = "Готов к работе. Выберите функцию и нажмите 'Запустить оптимизацию'";
+            UpdateIterationDisplay(-1);
+            txtConverged.Text = "-";
+            txtFinalError.Text = "-";
 
-            ClearCanvas();
+            _uiManager.UpdateStatus("Готов");
+            _uiManager.UpdateStatusBar("Готов к работе. Выберите функцию и нажмите 'Запустить'");
+        }
+
+        private void RedrawWithContours()
+        {
+            if (_simplexManager.History.Count > 0)
+            {
+                var function = SelectFunction();
+                var drawOptions = DrawOptions.Create(_simplexManager.History, _simplexManager.Bounds);
+                drawOptions.Function = function;
+                drawOptions.ShowContours = chkShowContours.IsChecked == true;
+                _simplexManager.Redraw(drawOptions);
+            }
         }
 
         private async void BtnRun_Click(object sender, RoutedEventArgs e)
         {
             ResetAll();
-            await RunOptimizationAsync();
+            _uiManager.LockForOptimization();
+
+            var function = SelectFunction();
+            var parameters = GetParameters();
+            var initialPoints = CreateInitialPoints(function);
+
+            await _optimizationRunner.RunAsync(function, parameters, initialPoints);
         }
 
         private void BtnStep_Click(object sender, RoutedEventArgs e)
@@ -117,179 +204,105 @@ namespace NelderMeadVisualizer
         private void BtnReset_Click(object sender, RoutedEventArgs e)
         {
             ResetAll();
+            _uiManager.FullUnlock();
         }
 
         private void StartStepMode()
         {
-            ITestFunction function = SelectFunction();
-            var parameters = new Parameters
-            {
-                Tolerance = double.Parse(txtTolerance.Text, System.Globalization.CultureInfo.InvariantCulture),
-                MaxIterations = int.Parse(txtMaxIterations.Text)
-            };
-            MyPoint[] initialPoints = CreateInitialPoints(function);
+            var function = SelectFunction();
+            var parameters = GetParameters();
+            var initialPoints = CreateInitialPoints(function);
 
             _stepOptimizer.Initialize(function, parameters, initialPoints);
-            _history.Clear();
+            _simplexManager.Clear();
+            _uiManager.LockForStepMode();
 
             var initialSimplex = _stepOptimizer.CurrentSimplex;
             if (initialSimplex != null)
             {
-                _history.Add(initialSimplex, 0);
-                UpdateBounds(initialSimplex);
+                var options = DrawOptions.Create(_simplexManager.History, _simplexManager.Bounds);
+                options.Function = function;
+                options.ShowContours = chkShowContours.IsChecked == true;
+
+                _simplexManager.AddAndDraw(initialSimplex, 0, options);
             }
 
-            txtIterations.Text = "Итераций: 0";
-            txtStatus.Text = "Пошаговый режим. Нажимайте 'ШАГ'";
-            statusBarText.Text = "Пошаговый режим";
-            btnRun.IsEnabled = false;
+            UpdateIterationDisplay(0);
+            _uiManager.UpdateStatus("Пошаговый режим. Нажимайте 'ШАГ'", isError: false);
+            _uiManager.UpdateStatusBar("Пошаговый режим. Для выхода нажмите 'Сбросить'");
         }
 
-        private async Task RunOptimizationAsync()
+        private void ShowCompletionResult(OptimizationResult result)
         {
-            ITestFunction function = SelectFunction();
-            double tolerance = double.Parse(txtTolerance.Text, System.Globalization.CultureInfo.InvariantCulture);
-            int maxIterations = int.Parse(txtMaxIterations.Text);
-            MyPoint[] initialPoints = CreateInitialPoints(function);
+            var function = SelectFunction();
+            var parameters = GetParameters();
 
-            var simplex = new Simplex(initialPoints);
-            int iteration = 0;
+            txtResult.Text = _resultFormatter.FormatResult(result, parameters);
+            UpdateIterationDisplay(result.Iterations);
+            txtConverged.Text = result.Converged ? "Да" : "Нет";
 
-            _history.Clear();
-            _history.Add(simplex, 0);
-            UpdateBounds(simplex);
+            double error = function.CalculateError(result.OptimalPoint.Coordinates);
+            txtFinalError.Text = $"{error:F8}";
 
-            while (iteration < maxIterations && !simplex.IsConverged(tolerance))
-            {
-                iteration++;
-
-                double[] centroid = simplex.GetCentroidCoordinates();
-                MyPoint reflected = simplex.Reflect(centroid, function.Evaluate, 1.0);
-
-                if (reflected.Value < simplex.Best.Value)
-                {
-                    MyPoint expanded = simplex.Expand(centroid, reflected, function.Evaluate, 2.0);
-                    simplex.ReplaceWorst(expanded.Value < reflected.Value ? expanded : reflected);
-                }
-                else if (reflected.Value < simplex.SecondWorst.Value)
-                {
-                    simplex.ReplaceWorst(reflected);
-                }
-                else
-                {
-                    if (reflected.Value < simplex.Worst.Value)
-                    {
-                        MyPoint contracted = simplex.ContractOutside(centroid, reflected, function.Evaluate, 0.5);
-                        if (contracted.Value < reflected.Value)
-                            simplex.ReplaceWorst(contracted);
-                        else
-                            simplex.Reduce(function.Evaluate, 0.5);
-                    }
-                    else
-                    {
-                        MyPoint contracted = simplex.ContractInside(centroid, function.Evaluate, 0.5);
-                        if (contracted.Value < simplex.Worst.Value)
-                            simplex.ReplaceWorst(contracted);
-                        else
-                            simplex.Reduce(function.Evaluate, 0.5);
-                    }
-                }
-
-                _history.Add(simplex, iteration);
-                UpdateBounds(simplex);
-                txtIterations.Text = $"Итераций: {iteration}";
-
-                await Task.Delay(150);
-            }
-
-            ShowCompletionResult(simplex, iteration);
-            btnRun.IsEnabled = true;
+            _uiManager.UpdateStatus(_resultFormatter.GetStatusText(result.Converged));
+            _uiManager.UpdateStatusBar("Готово");
         }
 
-        private void ShowCompletionResult(Simplex simplex, int iteration)
+        private void ShowCancelledResult()
         {
-            var result = new OptimizationResult
-            {
-                OptimalPoint = simplex.Best,
-                Iterations = iteration,
-                Converged = true,
-                FunctionName = _stepOptimizer.CurrentSimplex != null ?
-                    SelectFunction().Name : SelectFunction().Name
-            };
-            ShowResult(result);
+            _uiManager.UpdateStatus("Прервано", isError: true);
+            _uiManager.UpdateStatusBar("Оптимизация прервана");
+        }
 
-            if (_stepOptimizer.IsCompleted || iteration >= int.Parse(txtMaxIterations.Text))
-            {
-                txtStatus.Text = "Оптимизация завершена! Нажмите 'Сбросить'";
-                btnStep.IsEnabled = false;
-            }
-            else
-            {
-                txtStatus.Text = "Оптимизация завершена успешно!";
-                txtStatus.Foreground = new SolidColorBrush(Colors.Green);
-            }
+        private void UpdateIterationDisplay(int iteration)
+        {
+            txtIterations.Text = iteration >= 0 ? $"{iteration}" : "-";
         }
 
         private ITestFunction SelectFunction()
         {
-            if (rbSphere.IsChecked == true)
-                return new SphereFunction(2);
-            if (rbRosenbrock.IsChecked == true)
-                return new RosenbrockFunction();
-            if (rbQuadratic.IsChecked == true)
-                return new QuadraticFunction();
-            if (rbRastrigin.IsChecked == true)
-                return new RastriginFunction();
-            return new SphereFunction(2);
-        }
+            string selected = (cmbFunction.SelectedItem as ComboBoxItem)?.Content.ToString();
 
+            switch (selected)
+            {
+                case "Сферическая": return new SphereFunction(2);
+                case "Розенброка": return new RosenbrockFunction();
+                case "Квадратичная": return new QuadraticFunction();
+                case "Растригина": return new RastriginFunction();
+                default: return new SphereFunction(2);
+            }
+        }
         private MyPoint[] CreateInitialPoints(ITestFunction function)
         {
-            return new MyPoint[]
+            try
             {
-                MyPoint.Create(function.Evaluate, 2.0, 2.0),
-                MyPoint.Create(function.Evaluate, 3.0, 2.0),
-                MyPoint.Create(function.Evaluate, 2.0, 3.0)
-            };
-        }
+                var culture = System.Globalization.CultureInfo.InvariantCulture;
+                double x1 = double.Parse(txtX1.Text, culture);
+                double y1 = double.Parse(txtY1.Text, culture);
+                double x2 = double.Parse(txtX2.Text, culture);
+                double y2 = double.Parse(txtY2.Text, culture);
+                double x3 = double.Parse(txtX3.Text, culture);
+                double y3 = double.Parse(txtY3.Text, culture);
 
-        private void ShowResult(OptimizationResult result)
-        {
-            string output = $"=== РЕЗУЛЬТАТ ОПТИМИЗАЦИИ ===\n\n";
-            output += $"Функция: {result.FunctionName}\n";
-            output += $"Найденная точка: {result.OptimalPoint}\n";
-            output += $"Количество итераций: {result.Iterations}\n";
-            output += $"Сходимость: {(result.Converged ? "ДА " : "НЕТ ")}\n";
-
-            if (!result.Converged)
-                output += "\n Внимание: Достигнут лимит итераций!";
-
-            txtResult.Text = output;
-            txtIterations.Text = $"Итераций: {result.Iterations}";
-            txtConverged.Text = $"Сходимость: {(result.Converged ? "Да" : "Нет")}";
-
-            if (result.Converged)
-            {
-                txtStatus.Text = "Оптимизация завершена успешно!";
-                txtStatus.Foreground = new SolidColorBrush(Colors.Green);
-                statusBarText.Text = "Готово";
+                return new MyPoint[]
+                {
+                    MyPoint.Create(function.Evaluate, x1, y1),
+                    MyPoint.Create(function.Evaluate, x2, y2),
+                    MyPoint.Create(function.Evaluate, x3, y3)
+                };
             }
-            else
+            catch (Exception ex)
             {
-                txtStatus.Text = "Оптимизация не сошлась (лимит итераций)";
-                txtStatus.Foreground = new SolidColorBrush(Colors.Red);
-                statusBarText.Text = "Не сошлась";
-            }
-        }
+                MessageBox.Show($"Ошибка в начальных точках: {ex.Message}\nИспользуются стандартные значения",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-        private void ClearCanvas()
-        {
-            SimplexCanvas.Children.Clear();
-            _history?.Clear();
-        }
-        private void ResetZoom_Click(object sender, RoutedEventArgs e)
-        {
-            _zoomController.Reset();
+                return new MyPoint[]
+                {
+                    MyPoint.Create(function.Evaluate, 2.0, 2.0),
+                    MyPoint.Create(function.Evaluate, 3.0, 2.0),
+                    MyPoint.Create(function.Evaluate, 2.0, 3.0)
+                };
+            }
         }
     }
 }

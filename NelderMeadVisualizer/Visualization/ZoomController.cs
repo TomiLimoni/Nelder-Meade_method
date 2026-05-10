@@ -85,5 +85,9 @@ namespace NelderMeadVisualizer.Visualization
         {
             return y * (baseScale * _userScale) + (baseOffsetY + _userOffsetY);
         }
+        public double GetCurrentScale()
+        {
+            return _userScale;
+        }
     }
 }

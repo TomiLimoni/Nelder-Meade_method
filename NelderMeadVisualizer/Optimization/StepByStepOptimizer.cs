@@ -10,6 +10,12 @@ using MyPoint = NelderMeadOptimization.Models.Point;
 
 namespace NelderMeadVisualizer.Optimization
 {
+    /// <summary>
+    /// Пошаговый оптимизатор для визуализации алгоритма Нелдера-Мида.
+    /// Выполняет одну итерацию за раз, позволяя пользователю наблюдать за процессом.
+    /// ВНИМАНИЕ: Логика дублирует NelderMeadOptimizer, но это необходимо для 
+    /// пошагового режима визуализации.
+    /// </summary>
     internal class StepByStepOptimizer
     {
         private ITestFunction _function;
@@ -46,11 +52,11 @@ namespace NelderMeadVisualizer.Optimization
             _iteration++;
 
             double[] centroid = _simplex.GetCentroidCoordinates();
-            MyPoint reflected = _simplex.Reflect(centroid, _function.Evaluate, 1.0);
+            MyPoint reflected = _simplex.Reflect(centroid, _function.Evaluate, _params.Alpha);
 
             if (reflected.Value < _simplex.Best.Value)
             {
-                MyPoint expanded = _simplex.Expand(centroid, reflected, _function.Evaluate, 2.0);
+                MyPoint expanded = _simplex.Expand(centroid, reflected, _function.Evaluate, _params.Beta);
                 _simplex.ReplaceWorst(expanded.Value < reflected.Value ? expanded : reflected);
             }
             else if (reflected.Value < _simplex.SecondWorst.Value)
@@ -61,20 +67,25 @@ namespace NelderMeadVisualizer.Optimization
             {
                 if (reflected.Value < _simplex.Worst.Value)
                 {
-                    MyPoint contracted = _simplex.ContractOutside(centroid, reflected, _function.Evaluate, 0.5);
+                    MyPoint contracted = _simplex.ContractOutside(centroid, reflected, _function.Evaluate, _params.Gamma);
                     if (contracted.Value < reflected.Value)
                         _simplex.ReplaceWorst(contracted);
                     else
-                        _simplex.Reduce(_function.Evaluate, 0.5);
+                        _simplex.Reduce(_function.Evaluate, _params.Sigma);
                 }
                 else
                 {
-                    MyPoint contracted = _simplex.ContractInside(centroid, _function.Evaluate, 0.5);
+                    MyPoint contracted = _simplex.ContractInside(centroid, _function.Evaluate, _params.Gamma);
                     if (contracted.Value < _simplex.Worst.Value)
                         _simplex.ReplaceWorst(contracted);
                     else
-                        _simplex.Reduce(_function.Evaluate, 0.5);
+                        _simplex.Reduce(_function.Evaluate, _params.Sigma);
                 }
+            }
+
+            if (_simplex.IsConverged(_params.Tolerance) || _iteration >= _params.MaxIterations)
+            {
+                IsCompleted = true;
             }
 
             IterationCompleted?.Invoke(_simplex, _iteration);

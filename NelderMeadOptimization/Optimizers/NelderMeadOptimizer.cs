@@ -8,7 +8,12 @@ namespace NelderMeadOptimization.Optimizers
     {
         private readonly ITestFunction _function;
         private readonly Parameters _params;
+
+        // Добавляем событие для визуализации
         public event Action<Simplex, int> IterationCompleted;
+
+        // Добавляем свойство для доступа к последнему симплексу
+        public Simplex LastSimplex { get; private set; }
 
         public NelderMeadOptimizer(ITestFunction function, Parameters parameters = null)
         {
@@ -27,6 +32,10 @@ namespace NelderMeadOptimization.Optimizers
 
             var simplex = new Simplex(initialPoints);
             int iteration = 0;
+
+            // Сохраняем начальный симплекс
+            LastSimplex = simplex;
+            IterationCompleted?.Invoke(simplex, iteration);
 
             while (iteration < _params.MaxIterations && !simplex.IsConverged(_params.Tolerance))
             {
@@ -65,8 +74,10 @@ namespace NelderMeadOptimization.Optimizers
                             simplex.Reduce(_function.Evaluate, _params.Sigma);
                     }
                 }
-                IterationCompleted?.Invoke(simplex, iteration);
 
+                // Сохраняем и вызываем событие для визуализации
+                LastSimplex = simplex;
+                IterationCompleted?.Invoke(simplex, iteration);
             }
 
             return new OptimizationResult

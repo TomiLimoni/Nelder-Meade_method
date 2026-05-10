@@ -56,9 +56,24 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Optimization\StepByStepOptimizer.cs" />
+    <Compile Include="Services\DrawOptions.cs" />
+    <Compile Include="Services\OptimizationData.cs" />
+    <Compile Include="Services\OptimizationRunner.cs" />
+    <Compile Include="Services\ResultFormatter.cs" />
+    <Compile Include="Services\SimplexStateManager.cs" />
+    <Compile Include="Services\UIControls.cs" />
+    <Compile Include="Services\UIManager.cs" />
+    <Compile Include="Visualization\AxisRenderer.cs" />
+    <Compile Include="Visualization\Bounds.cs" />
     <Compile Include="Visualization\ColorHelper.cs" />
+    <Compile Include="Visualization\ContourRenderer.cs" />
+    <Compile Include="Visualization\DrawingContext.cs" />
+    <Compile Include="Visualization\InfoPanelRenderer.cs" />
     <Compile Include="Visualization\SimplexDrawer.cs" />
     <Compile Include="Visualization\SimplexHistory.cs" />
+    <Compile Include="Visualization\SimplexLineRenderer.cs" />
+    <Compile Include="Visualization\SimplexPointRenderer.cs" />
+    <Compile Include="Visualization\StyleHelper.cs" />
     <Compile Include="Visualization\ZoomController.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

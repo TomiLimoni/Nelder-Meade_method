@@ -11,5 +11,8 @@ namespace NelderMeadOptimization.Interface
         string Name { get; }
         double Evaluate(double[] coordinates);
         int Dimension { get; }
+
+        double[] GetRecommendedContourLevels(double visibleMin, double visibleMax);
+        double CalculateError(double[] point);
     }
 }
