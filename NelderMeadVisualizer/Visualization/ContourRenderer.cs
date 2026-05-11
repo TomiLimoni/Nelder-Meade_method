@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows;
 
 namespace NelderMeadVisualizer.Visualization
 {
@@ -149,81 +150,92 @@ namespace NelderMeadVisualizer.Visualization
                     double f21 = GetCachedValue(x2, y1);
                     double f22 = GetCachedValue(x2, y2);
 
-                    DrawLinesInCell(x1, y1, x2, y2, f11, f12, f21, f22, level);
+                    var cell = new Cell(x1, y1, x2, y2, f11, f12, f21, f22);
+                    DrawLinesInCell(cell, level);
                 }
             }
         }
 
-        private void DrawLinesInCell(double x1, double y1, double x2, double y2,
-                                     double f11, double f12, double f21, double f22,
-                                     double level)
+        private void DrawLinesInCell(Cell cell, double level)
         {
-            bool top = (f11 - level) * (f12 - level) < 0;
-            bool bottom = (f21 - level) * (f22 - level) < 0;
-            bool left = (f11 - level) * (f21 - level) < 0;
-            bool right = (f12 - level) * (f22 - level) < 0;
+            bool top = (cell.F11 - level) * (cell.F12 - level) < 0;
+            bool bottom = (cell.F21 - level) * (cell.F22 - level) < 0;
+            bool left = (cell.F11 - level) * (cell.F21 - level) < 0;
+            bool right = (cell.F12 - level) * (cell.F22 - level) < 0;
 
             if (!top && !bottom && !left && !right) return;
 
             if (top && bottom)
             {
-                double t = GetInterpolationT(f11, f12, level);
-                double x_top = x1 + t * (x2 - x1);
-                double y_top = y1;
-                t = GetInterpolationT(f21, f22, level);
-                double x_bottom = x1 + t * (x2 - x1);
-                double y_bottom = y2;
-                DrawSegment(x_top, y_top, x_bottom, y_bottom);
+                double t = GetInterpolationT(cell.F11, cell.F12, level);
+                double x_top = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_top = cell.Y1;
+                t = GetInterpolationT(cell.F21, cell.F22, level);
+                double x_bottom = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_bottom = cell.Y2;
+                Point p_top = new Point(x_top, y_top);
+                Point p_bottom = new Point(x_bottom, y_bottom);
+                DrawSegment(p_top, p_bottom);
             }
             else if (left && right)
             {
-                double t = GetInterpolationT(f11, f21, level);
-                double x_left = x1;
-                double y_left = y1 + t * (y2 - y1);
-                t = GetInterpolationT(f12, f22, level);
-                double x_right = x2;
-                double y_right = y1 + t * (y2 - y1);
-                DrawSegment(x_left, y_left, x_right, y_right);
+                double t = GetInterpolationT(cell.F11, cell.F21, level);
+                double x_left = cell.X1;
+                double y_left = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                t = GetInterpolationT(cell.F12, cell.F22, level);
+                double x_right = cell.X2;
+                double y_right = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                Point p_left = new Point(x_left, y_left);
+                Point p_right = new Point(x_right, y_right);
+                DrawSegment(p_left, p_right);
             }
             else if (top && left)
             {
-                double t = GetInterpolationT(f11, f12, level);
-                double x_top = x1 + t * (x2 - x1);
-                double y_top = y1;
-                t = GetInterpolationT(f11, f21, level);
-                double x_left = x1;
-                double y_left = y1 + t * (y2 - y1);
-                DrawSegment(x_top, y_top, x_left, y_left);
+                double t = GetInterpolationT(cell.F11, cell.F12, level);
+                double x_top = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_top = cell.Y1;
+                t = GetInterpolationT(cell.F11, cell.F21, level);
+                double x_left = cell.X1;
+                double y_left = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                Point p_top = new Point(x_top, y_top);
+                Point p_left = new Point(x_left, y_left);
+                DrawSegment(p_top, p_left);
             }
             else if (top && right)
             {
-                double t = GetInterpolationT(f11, f12, level);
-                double x_top = x1 + t * (x2 - x1);
-                double y_top = y1;
-                t = GetInterpolationT(f12, f22, level);
-                double x_right = x2;
-                double y_right = y1 + t * (y2 - y1);
-                DrawSegment(x_top, y_top, x_right, y_right);
+                double t = GetInterpolationT(cell.F11, cell.F12, level);
+                double x_top = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_top = cell.Y1;
+                t = GetInterpolationT(cell.F12, cell.F22, level);
+                double x_right = cell.X2;
+                double y_right = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                Point p_top = new Point(x_top, y_top);
+                Point p_right = new Point(x_right, y_right);
+                DrawSegment(p_top, p_right);
             }
             else if (bottom && left)
             {
-                double t = GetInterpolationT(f21, f22, level);
-                double x_bottom = x1 + t * (x2 - x1);
-                double y_bottom = y2;
-                t = GetInterpolationT(f11, f21, level);
-                double x_left = x1;
-                double y_left = y1 + t * (y2 - y1);
-                DrawSegment(x_bottom, y_bottom, x_left, y_left);
+                double t = GetInterpolationT(cell.F21, cell.F22, level);
+                double x_bottom = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_bottom = cell.Y2;
+                t = GetInterpolationT(cell.F11, cell.F21, level);
+                double x_left = cell.X1;
+                double y_left = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                Point p_bottom = new Point(x_bottom, y_bottom);
+                Point p_left = new Point(x_left, y_left);
+                DrawSegment(p_bottom, p_left);
             }
             else if (bottom && right)
             {
-                double t = GetInterpolationT(f21, f22, level);
-                double x_bottom = x1 + t * (x2 - x1);
-                double y_bottom = y2;
-                t = GetInterpolationT(f12, f22, level);
-                double x_right = x2;
-                double y_right = y1 + t * (y2 - y1);
-                DrawSegment(x_bottom, y_bottom, x_right, y_right);
+                double t = GetInterpolationT(cell.F21, cell.F22, level);
+                double x_bottom = cell.X1 + t * (cell.X2 - cell.X1);
+                double y_bottom = cell.Y2;
+                t = GetInterpolationT(cell.F12, cell.F22, level);
+                double x_right = cell.X2;
+                double y_right = cell.Y1 + t * (cell.Y2 - cell.Y1);
+                Point p_bottom = new Point(x_bottom, y_bottom);
+                Point p_right = new Point(x_right, y_right);
+                DrawSegment(p_bottom, p_right);
             }
         }
 
@@ -233,24 +245,24 @@ namespace NelderMeadVisualizer.Visualization
             return (level - f1) / (f2 - f1);
         }
 
-        private void DrawSegment(double x1, double y1, double x2, double y2)
+        private void DrawSegment(Point p1, Point p2)
         {
-            var p1 = _context.Transform(x1, y1, _zoom);
-            var p2 = _context.Transform(x2, y2, _zoom);
+            var screenP1 = _context.Transform(p1.X, p1.Y, _zoom);
+            var screenP2 = _context.Transform(p2.X, p2.Y, _zoom);
 
-            if (p1.X < -1000 && p2.X < -1000) return;
-            if (p1.X > _context.CanvasWidth + 1000 && p2.X > _context.CanvasWidth + 1000) return;
-            if (p1.Y < -1000 && p2.Y < -1000) return;
-            if (p1.Y > _context.CanvasHeight + 1000 && p2.Y > _context.CanvasHeight + 1000) return;
+            if (screenP1.X < -1000 && screenP2.X < -1000) return;
+            if (screenP1.X > _context.CanvasWidth + 1000 && screenP2.X > _context.CanvasWidth + 1000) return;
+            if (screenP1.Y < -1000 && screenP2.Y < -1000) return;
+            if (screenP1.Y > _context.CanvasHeight + 1000 && screenP2.Y > _context.CanvasHeight + 1000) return;
 
             double thickness = _zoom.GetCurrentScale() > 1.5 ? 1.0 : 0.7;
 
             _canvas.Children.Add(new Line
             {
-                X1 = p1.X,
-                Y1 = p1.Y,
-                X2 = p2.X,
-                Y2 = p2.Y,
+                X1 = screenP1.X,
+                Y1 = screenP1.Y,
+                X2 = screenP2.X,
+                Y2 = screenP2.Y,
                 Stroke = new SolidColorBrush(Color.FromRgb(140, 140, 140)),
                 StrokeThickness = thickness,
                 StrokeDashArray = new DoubleCollection { 4, 3 }

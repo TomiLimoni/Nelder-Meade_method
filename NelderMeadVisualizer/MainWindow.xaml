@@ -39,6 +39,7 @@
                         <ComboBoxItem Content="Сферическая"/>
                         <ComboBoxItem Content="Розенброка"/>
                         <ComboBoxItem Content="Квадратичная"/>
+                        <ComboBoxItem Content="Растригина"/>
                         <ComboBoxItem Content="Аккли"/>
                         <ComboBoxItem Content="Била"/>
                         <ComboBoxItem Content="Бута"/>

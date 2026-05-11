@@ -65,6 +65,7 @@
     <Compile Include="Services\UIManager.cs" />
     <Compile Include="Visualization\AxisRenderer.cs" />
     <Compile Include="Visualization\Bounds.cs" />
+    <Compile Include="Visualization\Cell.cs" />
     <Compile Include="Visualization\ColorHelper.cs" />
     <Compile Include="Visualization\ContourRenderer.cs" />
     <Compile Include="Visualization\DrawingContext.cs" />
