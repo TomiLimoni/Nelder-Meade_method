@@ -48,5 +48,60 @@ namespace NelderMeadTests
 
             Assert.AreEqual(0.0, result, 1e-10);
         }
+        [TestMethod]
+        public void AckleyFunction_result_in_point()
+        {
+            var ackley = new AckleyFunction();
+            double[] point = { 0.0, 0.0 };
+
+            double result = ackley.Evaluate(point);
+
+            Assert.AreEqual(0.0, result, 1e-10);
+        }
+
+        [TestMethod]
+        public void BealeFunction_result_in_point()
+        {
+            var beale = new BealeFunction();
+            double[] point = { 3.0, 0.5 };
+
+            double result = beale.Evaluate(point);
+
+            Assert.AreEqual(0.0, result, 1e-10);
+        }
+
+        [TestMethod]
+        public void BoothFunction_result_in_point()
+        {
+            var booth = new BoothFunction();
+            double[] point = { 1.0, 3.0 };
+
+            double result = booth.Evaluate(point);
+
+            Assert.AreEqual(0.0, result, 1e-10);
+        }
+
+        [TestMethod]
+        public void GoldsteinPriceFunction_result_in_point()
+        {
+            var goldsteinPrice = new GoldsteinPriceFunction();
+            double[] point = { 0.0, -1.0 };
+
+            double result = goldsteinPrice.Evaluate(point);
+
+            Assert.AreEqual(3.0, result, 1e-10);
+        }
+
+        [TestMethod]
+        public void HimmelblauFunction_result_in_one_of_minimums()
+        {
+            var himmelblau = new HimmelblauFunction();
+            // Один из четырёх глобальных минимумов: (3.0, 2.0)
+            double[] point = { 3.0, 2.0 };
+
+            double result = himmelblau.Evaluate(point);
+
+            Assert.AreEqual(0.0, result, 1e-10);
+        }
     }
 }

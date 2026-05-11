@@ -39,7 +39,11 @@
                         <ComboBoxItem Content="Сферическая"/>
                         <ComboBoxItem Content="Розенброка"/>
                         <ComboBoxItem Content="Квадратичная"/>
-                        <ComboBoxItem Content="Растригина"/>
+                        <ComboBoxItem Content="Аккли"/>
+                        <ComboBoxItem Content="Била"/>
+                        <ComboBoxItem Content="Бута"/>
+                        <ComboBoxItem Content="Гольдштейна-Прайса"/>
+                        <ComboBoxItem Content="Химмельблау"/>
                     </ComboBox>
 
                     <Separator Margin="0,10,0,10"/>

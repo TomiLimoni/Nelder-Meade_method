@@ -269,6 +269,11 @@ namespace NelderMeadVisualizer
                 case "Розенброка": return new RosenbrockFunction();
                 case "Квадратичная": return new QuadraticFunction();
                 case "Растригина": return new RastriginFunction();
+                case "Аккли": return new AckleyFunction();
+                case "Била": return new BealeFunction();
+                case "Бута": return new BoothFunction();
+                case "Гольдштейна-Прайса": return new GoldsteinPriceFunction();
+                case "Химмельблау": return new HimmelblauFunction();
                 default: return new SphereFunction(2);
             }
         }

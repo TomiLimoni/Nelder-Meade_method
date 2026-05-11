@@ -44,6 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Functions\AckleyFunction.cs" />
+    <Compile Include="Functions\BealeFunction.cs" />
+    <Compile Include="Functions\BoothFunction.cs" />
+    <Compile Include="Functions\GoldsteinPriceFunction.cs" />
+    <Compile Include="Functions\HimmelblauFunction.cs" />
     <Compile Include="Functions\QuadraticFunction.cs" />
     <Compile Include="Functions\RastriginFunction.cs" />
     <Compile Include="Functions\RosenbrockFunction.cs" />
