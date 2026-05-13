@@ -172,10 +172,6 @@
                             Background="#FF9800" Foreground="White" 
                             FontWeight="Bold" Height="35" Margin="0,5,0,5"/>
 
-                    <Button x:Name="btnStepBack" Content="Шаг назад" 
-                            Background="#9C27B0" Foreground="White" 
-                            FontWeight="Bold" Height="35" Margin="0,5,0,5"/>
-
                     <Button x:Name="btnReset" Content="Сбросить" 
                             Background="#FF5722" Foreground="White" 
                             FontWeight="Bold" Height="35" Margin="0,5,0,5"/>
